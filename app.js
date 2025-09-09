@@ -322,14 +322,23 @@ class TransportApp {
         const loginBtn = document.getElementById('auth-login-btn');
         const logoutBtn = document.getElementById('auth-logout-btn');
         const userLabel = document.getElementById('auth-user-label');
+        const userAvatar = document.querySelector('.user-avatar');
         if (session && session.user) {
             loginBtn?.classList.add('hidden');
             logoutBtn?.classList.remove('hidden');
-            if (userLabel) userLabel.textContent = session.user.email || 'Utilisateur';
+            const email = session.user.email || '';
+            if (userLabel) userLabel.textContent = email || 'Utilisateur';
+            // initials from email before '@'
+            if (userAvatar) {
+                const local = (email.split('@')[0] || '').toUpperCase();
+                const initials = local ? local.slice(0, 2) : 'US';
+                userAvatar.textContent = initials;
+            }
         } else {
             loginBtn?.classList.remove('hidden');
             logoutBtn?.classList.add('hidden');
-            if (userLabel) userLabel.textContent = 'Invite';
+            if (userLabel) userLabel.textContent = 'Invité';
+            if (userAvatar) userAvatar.textContent = 'AD';
         }
         setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 0);
     }
