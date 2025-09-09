@@ -1410,7 +1410,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
         const isSecure = location.protocol === 'https:' || isLocalhost;
         if (isSecure) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW register failed', err));
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => { try { reg.update(); } catch {} })
+              .catch(err => console.warn('SW register failed', err));
         } else {
             console.info('Service Worker non enregistré: nécessite https ou localhost.');
         }
