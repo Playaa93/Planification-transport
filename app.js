@@ -254,7 +254,11 @@ class TransportApp {
         // Hook auth state and update UI
         try {
             if (!window._supabaseAuthHooked) {
-                client.auth.onAuthStateChange(async () => {
+                client.auth.onAuthStateChange(async (event, session) => {
+                    console.log('[AUTH] state', event, !!session);
+                    if (event === 'PASSWORD_RECOVERY') {
+                        this.openResetModal();
+                    }
                     await this.updateAuthUI();
                     await this.initSupabase();
                 });
@@ -345,7 +349,7 @@ class TransportApp {
         const { data, error } = await client.auth.signInWithPassword({ email, password });
         console.log('[AUTH] signIn response', { error, session: data?.session ? { user: data.session.user?.id } : null });
         if (error) {
-            this.showToast('Identifiants invalides', 'error');
+            this.showToast(error.message || 'Identifiants invalides', 'error');
             return;
         }
         this.showToast('Connecte', 'success');
@@ -361,6 +365,41 @@ class TransportApp {
         await client.auth.signOut();
         this.showToast('Deconnecte', 'success');
         await this.updateAuthUI();
+    }
+
+    async forgotPassword() {
+        const client = this.getSupabaseClient();
+        if (!client) return this.showToast('Supabase non configure', 'error');
+        const emailEl = document.getElementById('auth-email');
+        const email = emailEl?.value?.trim();
+        if (!email) {
+            this.showToast('Entrez votre email dans le champ', 'warning');
+            return;
+        }
+        const redirectTo = `${location.origin}${location.pathname}`;
+        console.log('[AUTH] resetPasswordForEmail', { email, redirectTo });
+        const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) {
+            this.showToast(error.message || 'Erreur envoi du lien', 'error');
+            return;
+        }
+        this.showToast('Lien de réinitialisation envoyé', 'success');
+    }
+
+    async submitResetPassword() {
+        const client = this.getSupabaseClient();
+        if (!client) return this.showToast('Supabase non configure', 'error');
+        const pw = document.getElementById('reset-password')?.value || '';
+        const pw2 = document.getElementById('reset-password-confirm')?.value || '';
+        if (!pw || pw.length < 6) { this.showToast('Mot de passe trop court', 'warning'); return; }
+        if (pw !== pw2) { this.showToast('Les mots de passe ne correspondent pas', 'warning'); return; }
+        console.log('[AUTH] updateUser password');
+        const { data, error } = await client.auth.updateUser({ password: pw });
+        if (error) { this.showToast(error.message || 'Échec mise à jour', 'error'); return; }
+        this.showToast('Mot de passe mis à jour', 'success');
+        document.getElementById('reset-modal')?.classList.add('hidden');
+        await this.updateAuthUI();
+        await this.initSupabase();
     }
 
     async saveMissionSupabase() {
@@ -572,6 +611,18 @@ class TransportApp {
             e.preventDefault();
             console.log('[UI] test-notification-btn clicked');
             this.sendTestNotification();
+        });
+
+        // Forgot password flow
+        const forgotBtn = document.getElementById('auth-forgot-btn');
+        if (forgotBtn) forgotBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await this.forgotPassword();
+        });
+        const resetSubmit = document.getElementById('reset-submit-btn');
+        if (resetSubmit) resetSubmit.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await this.submitResetPassword();
         });
 
         // Auth controls
@@ -1333,6 +1384,18 @@ class TransportApp {
     closeModal(modalId) {
         document.getElementById(modalId).classList.add('hidden');
         this.currentEditingMission = null;
+    }
+
+    openResetModal() {
+        const modal = document.getElementById('reset-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                const pw = document.getElementById('reset-password');
+                if (pw) pw.focus();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 0);
+        }
     }
 
     showToast(message, type = 'info') {

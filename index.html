@@ -363,9 +363,42 @@
                 </form>
                 <p class="text-sm">Astuce: utilisez le compte créé dans Supabase Auth.</p>
             </div>
+                <div class="modal-actions-row">
+                    <button class="btn btn--outline btn--sm" id="auth-forgot-btn">Mot de passe oublié ?</button>
+                </div>
             <div class="modal-footer">
                 <button class="btn btn--secondary" onclick="closeModal('auth-modal')">Annuler</button>
                 <button class="btn btn--primary" id="auth-submit-btn">Se connecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal hidden" id="reset-modal">
+        <div class="modal-overlay" onclick="closeModal('reset-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Réinitialiser le mot de passe</h3>
+                <button class="modal-close" onclick="closeModal('reset-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nouveau mot de passe</label>
+                        <input type="password" class="form-control" id="reset-password" placeholder="Nouveau mot de passe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" class="form-control" id="reset-password-confirm" placeholder="Confirmer" required>
+                    </div>
+                </div>
+                <p class="text-sm">Vous arrivez ici depuis le lien de réinitialisation.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" onclick="closeModal('reset-modal')">Annuler</button>
+                <button class="btn btn--primary" id="reset-submit-btn">Mettre à jour</button>
             </div>
         </div>
     </div>
