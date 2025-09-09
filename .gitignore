@@ -1,0 +1,29 @@
+# Node / tooling
+node_modules/
+.pnp*
+pnpm-lock.yaml
+yarn.lock
+npm-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+.next/
+.cache/
+
+# Local env and platform files
+.env*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# Netlify/Vercel local folders
+.netlify/
+.vercel/
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransportPro - Gestion des missions</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#0f172a">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header__content">
+                <div class="header__left">
+                    <h1 class="logo">🚛 TransportPro</h1>
+                </div>
+                <nav class="nav">
+                    <button class="nav__item nav__item--active" data-page="dashboard">
+                        <i data-lucide="home"></i>
+                        <span>Tableau de bord</span>
+                    </button>
+                    <button class="nav__item" data-page="missions">
+                        <i data-lucide="truck"></i>
+                        <span>Missions</span>
+                    </button>
+                    <button class="nav__item" data-page="planning">
+                        <i data-lucide="calendar"></i>
+                        <span>Planning</span>
+                    </button>
+                    <button class="nav__item" data-page="gestion">
+                        <i data-lucide="settings"></i>
+                        <span>Gestion</span>
+                    </button>
+                    <button class="nav__item" data-page="notifications">
+                        <i data-lucide="bell"></i>
+                        <span>Notifications</span>
+                    </button>
+                </nav>
+                <div class="header__right">
+                    <button class="btn btn--secondary btn--sm" id="theme-toggle">
+                        <i data-lucide="moon"></i>
+                    </button>
+                    <button class="btn btn--secondary btn--sm" id="test-supabase-btn" title="Tester connexion Supabase">
+                        <i data-lucide="plug"></i>
+                    </button>
+                    <button class="btn btn--primary btn--sm" id="auth-login-btn">
+                        <i data-lucide="log-in"></i>
+                        <span>Se connecter</span>
+                    </button>
+                    <button class="btn btn--secondary btn--sm hidden" id="auth-logout-btn">
+                        <i data-lucide="log-out"></i>
+                        <span>Se déconnecter</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar">AD</div>
+                        <span class="user-name" id="auth-user-label">Invité</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Page -->
+            <div class="page" id="dashboard-page">
+                <div class="page-header">
+                    <h2>Tableau de bord</h2>
+                    <button class="btn btn--primary" id="nouvelle-mission-btn">
+                        <i data-lucide="plus"></i>
+                        Nouvelle mission
+                    </button>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Stats Cards -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--primary">
+                                <i data-lucide="truck"></i>
+                            </div>
+                            <div class="stat-card__content">
+                                <div class="stat-card__number" id="missions-today">0</div>
+                                <div class="stat-card__label">Missions aujourd'hui</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--success">
+                                <i data-lucide="check-circle"></i>
+                            </div>
+                            <div class="stat-card__content">
+                                <div class="stat-card__number" id="missions-completed">0</div>
+                                <div class="stat-card__label">Terminées</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--warning">
+                                <i data-lucide="clock"></i>
+                            </div>
+                            <div class="stat-card__content">
+                                <div class="stat-card__number" id="missions-progress">0</div>
+                                <div class="stat-card__label">En cours</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--info">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="stat-card__content">
+                                <div class="stat-card__number" id="drivers-active">0</div>
+                                <div class="stat-card__label">Conducteurs actifs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Missions -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-card__header">
+                            <h3>Missions récentes</h3>
+                            <button class="btn btn--outline btn--sm" onclick="showPage('missions')">Voir tout</button>
+                        </div>
+                        <div class="dashboard-card__body">
+                            <div id="recent-missions">
+                                <!-- Missions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Planning -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-card__header">
+                            <h3>Planning du jour</h3>
+                            <button class="btn btn--outline btn--sm" onclick="showPage('planning')">Voir planning</button>
+                        </div>
+                        <div class="dashboard-card__body">
+                            <div id="today-planning">
+                                <!-- Today's missions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missions Page -->
+            <div class="page hidden" id="missions-page">
+                <div class="page-header">
+                    <h2>Gestion des missions</h2>
+                    <div class="page-actions">
+                        <div class="filters">
+                            <select class="form-control" id="filter-status">
+                                <option value="">Tous les statuts</option>
+                                <option value="planifie">Planifiée</option>
+                                <option value="en_cours">En cours</option>
+                                <option value="termine">Terminée</option>
+                            </select>
+                            <select class="form-control" id="filter-driver">
+                                <option value="">Tous les conducteurs</option>
+                            </select>
+                        </div>
+                        <button class="btn btn--primary" id="add-mission-btn">
+                            <i data-lucide="plus"></i>
+                            Nouvelle mission
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="missions-grid" id="missions-list">
+                    <!-- Missions will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Planning Page -->
+            <div class="page hidden" id="planning-page">
+                <div class="page-header">
+                    <h2>Planning journalier</h2>
+                    <div class="page-actions">
+                        <input type="date" class="form-control" id="planning-date" value="2025-09-03">
+                        <select class="form-control" id="planning-view">
+                            <option value="conducteur">Par conducteur</option>
+                            <option value="vehicule">Par véhicule</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="planning-grid" id="planning-content">
+                    <!-- Planning will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Gestion Page -->
+            <div class="page hidden" id="gestion-page">
+                <div class="page-header">
+                    <h2>Gestion</h2>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-btn tab-btn--active" data-tab="conducteurs">Conducteurs</button>
+                    <button class="tab-btn" data-tab="vehicules">Véhicules</button>
+                    <button class="tab-btn" data-tab="contrats">Contrats</button>
+                </div>
+
+                <div class="tab-content">
+                    <!-- Conducteurs Tab -->
+                    <div class="tab-panel" id="conducteurs-tab">
+                        <div class="management-header">
+                            <button class="btn btn--primary" id="add-driver-btn">
+                                <i data-lucide="user-plus"></i>
+                                Nouveau conducteur
+                            </button>
+                        </div>
+                        <div class="management-table" id="conducteurs-table">
+                            <!-- Conducteurs table will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Véhicules Tab -->
+                    <div class="tab-panel hidden" id="vehicules-tab">
+                        <div class="management-header">
+                            <button class="btn btn--primary" id="add-vehicle-btn">
+                                <i data-lucide="plus"></i>
+                                Nouveau véhicule
+                            </button>
+                        </div>
+                        <div class="management-table" id="vehicules-table">
+                            <!-- Véhicules table will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Contrats Tab -->
+                    <div class="tab-panel hidden" id="contrats-tab">
+                        <div class="management-header">
+                            <button class="btn btn--primary" id="add-contract-btn">
+                                <i data-lucide="file-plus"></i>
+                                Nouveau contrat
+                            </button>
+                        </div>
+                        <div class="management-table" id="contrats-table">
+                            <!-- Contrats table will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Page -->
+            <div class="page hidden" id="notifications-page">
+                <div class="page-header">
+                    <h2>Notifications</h2>
+                    <button class="btn btn--primary" id="test-notification-btn">
+                        <i data-lucide="send"></i>
+                        Test notification
+                    </button>
+                </div>
+                
+                <div class="notifications-list" id="notifications-list">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mission Modal -->
+    <div class="modal hidden" id="mission-modal">
+        <div class="modal-overlay" onclick="closeModal('mission-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="mission-modal-title">Nouvelle mission</h3>
+                <button class="modal-close" onclick="closeModal('mission-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="mission-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Date de mission</label>
+                            <input type="date" class="form-control" id="mission-date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Contrat</label>
+                            <select class="form-control" id="mission-contract" required>
+                                <option value="">Sélectionner un contrat</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Conducteur</label>
+                            <select class="form-control" id="mission-driver" required>
+                                <option value="">Sélectionner un conducteur</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Véhicule</label>
+                            <select class="form-control" id="mission-vehicle" required>
+                                <option value="">Sélectionner un véhicule</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Heure de départ</label>
+                            <input type="time" class="form-control" id="mission-start-time" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Heure de retour prévue</label>
+                            <input type="time" class="form-control" id="mission-end-time" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">KM de départ</label>
+                            <input type="number" class="form-control" id="mission-km-start">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">KM client estimés</label>
+                            <input type="number" class="form-control" id="mission-km-client">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observations</label>
+                        <textarea class="form-control" id="mission-observations" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" onclick="closeModal('mission-modal')">Annuler</button>
+                <button class="btn btn--primary" id="save-mission-btn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal hidden" id="auth-modal">
+        <div class="modal-overlay" onclick="closeModal('auth-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Connexion</h3>
+                <button class="modal-close" onclick="closeModal('auth-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="auth-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="auth-email" placeholder="email@domaine.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="auth-password" placeholder="Votre mot de passe" required>
+                        </div>
+                    </div>
+                </form>
+                <p class="text-sm">Astuce: utilisez le compte créé dans Supabase Auth.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" onclick="closeModal('auth-modal')">Annuler</button>
+                <button class="btn btn--primary" id="auth-submit-btn">Se connecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container">
+        <!-- Toast notifications will appear here -->
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

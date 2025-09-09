@@ -1,0 +1,154 @@
+{
+  "conducteurs": [
+    {
+      "nom": "Niakaté Dioungou",
+      "presence": "Oui",
+      "types": "Sec",
+      "site": "PMS",
+      "commentaire": "Conducteur principal",
+      "actif": true
+    },
+    {
+      "nom": "Nabil Oubba",
+      "presence": "Non",
+      "types": "Frais",
+      "site": "PMS",
+      "commentaire": "Exploitant",
+      "actif": true
+    },
+    {
+      "nom": "Simon Manuana K",
+      "presence": "Oui",
+      "types": "Surgelé",
+      "site": "PMS",
+      "commentaire": "",
+      "actif": true
+    },
+    {
+      "nom": "Walid Ghndour",
+      "presence": "Oui",
+      "types": "Lavage/Gazoil",
+      "site": "PMS",
+      "commentaire": "SS Solde",
+      "actif": true
+    },
+    {
+      "nom": "Amadou Camara",
+      "presence": "Oui",
+      "types": "Dispo",
+      "site": "PMS",
+      "commentaire": "C.P",
+      "actif": true
+    }
+  ],
+  "vehicules": [
+    {
+      "immatriculation": "GX088HP",
+      "energie": "Gazoil",
+      "marque": "Renault",
+      "type_vehicule": "Tracteur",
+      "site": "PMS",
+      "hayon": false,
+      "controle_technique": "2025-12-31",
+      "commentaire": "",
+      "actif": true
+    },
+    {
+      "immatriculation": "GX870HN",
+      "energie": "Gazoil",
+      "marque": "Renault",
+      "type_vehicule": "Tracteur",
+      "site": "PMS",
+      "hayon": false,
+      "controle_technique": "2025-12-31",
+      "commentaire": "",
+      "actif": true
+    },
+    {
+      "immatriculation": "GG627LD",
+      "energie": "Gazoil",
+      "marque": "VOLVO",
+      "type_vehicule": "Tracteur",
+      "site": "PMS",
+      "hayon": false,
+      "controle_technique": "2025-12-31",
+      "commentaire": "",
+      "actif": true
+    },
+    {
+      "immatriculation": "GP458BD",
+      "energie": "Gazoil",
+      "marque": "Renault",
+      "type_vehicule": "Porteur",
+      "site": "PMS",
+      "hayon": true,
+      "controle_technique": "2025-12-31",
+      "commentaire": "",
+      "actif": true
+    }
+  ],
+  "contrats": [
+    {
+      "numero": "537",
+      "nom": "Jour(504)",
+      "type_transport": "Surgelé",
+      "description": "Transport surgelé journée",
+      "actif": true
+    },
+    {
+      "numero": "545",
+      "nom": "Semi jour(521)",
+      "type_transport": "Sec",
+      "description": "Transport sec semi-journée",
+      "actif": true
+    },
+    {
+      "numero": "538",
+      "nom": "Porteur NUIT(531)",
+      "type_transport": "Frais",
+      "description": "Transport frais nuit avec porteur",
+      "actif": true
+    },
+    {
+      "numero": "639N",
+      "nom": "Nuit 539 (632)",
+      "type_transport": "Frais",
+      "description": "Transport frais de nuit",
+      "actif": true
+    }
+  ],
+  "missions_exemple": [
+    {
+      "date_mission": "2025-08-01",
+      "contrat_numero": "537",
+      "conducteur_nom": "Niakaté Dioungou",
+      "vehicule_immat": "GX088HP",
+      "heure_depart": "05:00",
+      "heure_retour_prevue": "17:00",
+      "km_depart": 150000,
+      "km_fin": 150200,
+      "km_total": 200,
+      "km_client": 180,
+      "type_transport": "Surgelé",
+      "observations": "Livraison CRISTALINE - Cesson / Emerainville / Croissy B. / Montevrain / St Thibault",
+      "pda_confirme": true,
+      "statut": "termine"
+    },
+    {
+      "date_mission": "2025-08-02",
+      "contrat_numero": "545",
+      "conducteur_nom": "Simon Manuana K",
+      "vehicule_immat": "GG627LD",
+      "heure_depart": "10:00",
+      "heure_retour_prevue": "16:00",
+      "km_depart": 125000,
+      "km_fin": 125150,
+      "km_total": 150,
+      "km_client": 140,
+      "type_transport": "Sec",
+      "observations": "Viry 6329 / Juvisy 6757",
+      "pda_confirme": true,
+      "statut": "termine"
+    }
+  ]
+}
