@@ -1,10 +1,11 @@
-const CACHE = 'transportpro-v1';
+const CACHE = 'transportpro-v2';
+// Use relative paths so it works under GitHub Pages subpaths
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/supabase-config.js'
+  'index.html',
+  'style.css',
+  'app.js',
+  'supabase-config.js',
+  'manifest.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,7 +34,6 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE).then((cache) => cache.put(request, clone));
         return response;
       })
-      .catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
+      .catch(() => caches.match(request).then((cached) => cached || caches.match('index.html')))
   );
 });
-
