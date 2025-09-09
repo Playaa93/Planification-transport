@@ -213,6 +213,10 @@ class TransportApp {
     init() {
         this.setupEventListeners();
         this.showPage('dashboard');
+        // Set dynamic default dates
+        const today = this.getTodayStr();
+        const planningInput = document.getElementById('planning-date');
+        if (planningInput) planningInput.value = today;
         this.loadDashboardData();
         
         // Initialize icons after a short delay to ensure DOM is ready
@@ -221,6 +225,13 @@ class TransportApp {
                 lucide.createIcons();
             }
         }, 100);
+    }
+
+    getTodayStr() {
+        const d = new Date();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${m}-${day}`;
     }
 
     // --- Supabase integration ---
@@ -630,7 +641,7 @@ class TransportApp {
     }
 
     loadDashboardData() {
-        const today = '2025-09-03';
+        const today = this.getTodayStr();
         const todayMissions = this.data.missions.filter(m => m.date_mission === today);
         const completedMissions = todayMissions.filter(m => m.statut === 'termine');
         const activeMissions = todayMissions.filter(m => m.statut === 'en_cours');
@@ -674,7 +685,7 @@ class TransportApp {
     }
 
     loadTodayPlanning() {
-        const today = '2025-09-03';
+        const today = this.getTodayStr();
         const todayMissions = this.data.missions.filter(m => m.date_mission === today);
         const container = document.getElementById('today-planning');
         
@@ -775,6 +786,10 @@ class TransportApp {
                         <i data-lucide="send"></i>
                         Notification
                     </button>
+                    <button class="btn btn--secondary btn--sm delete-mission-btn" data-mission-id="${mission.id}">
+                        <i data-lucide="trash-2"></i>
+                        Supprimer
+                    </button>
                 </div>
             </div>
         `;
@@ -796,6 +811,15 @@ class TransportApp {
                 e.preventDefault();
                 const missionId = e.currentTarget.dataset.missionId;
                 this.sendMissionNotification(missionId);
+            });
+        });
+
+        // Delete mission buttons
+        document.querySelectorAll('.delete-mission-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const missionId = e.currentTarget.dataset.missionId;
+                await this.deleteMission(missionId);
             });
         });
 
@@ -1145,7 +1169,41 @@ class TransportApp {
 
     resetMissionForm() {
         document.getElementById('mission-form').reset();
-        document.getElementById('mission-date').value = '2025-09-03';
+        document.getElementById('mission-date').value = this.getTodayStr();
+    }
+
+    async deleteMission(missionId) {
+        if (!missionId) return;
+        const confirmMsg = 'Confirmer la suppression de cette mission ?';
+        if (!window.confirm(confirmMsg)) return;
+
+        const client = this.getSupabaseClient();
+        const { data: { session } } = client ? await client.auth.getSession() : { data: { session: null } };
+        const canUseRemote = !!client && !!session;
+
+        if (canUseRemote) {
+            console.group('[DELETE] mission');
+            console.log('Request', { table: 'missions', id: missionId });
+            const { error } = await client
+                .from('missions')
+                .delete()
+                .eq('id', missionId);
+            console.log('Response', { error });
+            console.groupEnd();
+            if (error) {
+                console.error('Delete mission error', error);
+                this.showToast('Échec suppression Supabase', 'error');
+                return;
+            }
+        }
+
+        this.data.missions = this.data.missions.filter(m => m.id !== missionId);
+        this.showToast('Mission supprimée', 'success');
+        if (this.currentPage === 'missions') {
+            this.loadMissionsPage();
+        } else if (this.currentPage === 'dashboard') {
+            this.loadDashboardData();
+        }
     }
 
     saveMission() {
@@ -1357,6 +1415,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.info('Service Worker non enregistré: nécessite https ou localhost.');
         }
     }
+});
+
+// Additional delegated handler for the test button + exposed helper
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.runSupabaseTest) {
+        window.runSupabaseTest = async () => {
+            console.log('[UI] test-supabase-btn clicked');
+            try {
+                const url = window.SUPABASE_URL;
+                const key = window.SUPABASE_ANON_KEY;
+                if (!url || !key) { window.app?.showToast('Supabase non configure', 'error'); return; }
+                if (typeof window.supabase === 'undefined') { window.app?.showToast('SDK Supabase non charge', 'error'); return; }
+                const client = window.supabaseClient || window.supabase.createClient(url, key);
+                window.supabaseClient = client;
+                const { data: sessionData, error } = await client.auth.getSession();
+                if (!error) window.app?.showToast('SDK Supabase initialise', 'success');
+                else window.app?.showToast(`Auth erreur: ${error?.message || 'inconnue'}`, 'warning');
+                console.log('Supabase test:', { sessionData, error });
+                window.app?.debugPingSupabase?.();
+            } catch (e) {
+                console.error('Supabase test error', e);
+                window.app?.showToast('Erreur de connexion Supabase', 'error');
+            }
+        };
+    }
+
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (t && typeof t.closest === 'function' && t.closest('#test-supabase-btn')) {
+            e.preventDefault();
+            window.runSupabaseTest();
+        }
+    });
 });
 
 // Supabase connectivity test

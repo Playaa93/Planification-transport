@@ -5,7 +5,8 @@ const ASSETS = [
   'style.css',
   'app.js',
   'supabase-config.js',
-  'manifest.webmanifest'
+  'manifest.webmanifest',
+  'favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -27,11 +28,26 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  // Ignore non-HTTP(S) schemes (e.g., chrome-extension://)
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+
+  // Favicon fallback (use cached SVG) when site is at domain root
+  if (url.pathname === '/favicon.ico') {
+    event.respondWith(
+      caches.match('favicon.svg').then((resp) => resp || fetch(request)).catch(() => fetch(request))
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(request)
       .then((response) => {
         const clone = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, clone));
+        // Cache only same-origin requests
+        if (url.origin === self.location.origin) {
+          caches.open(CACHE).then((cache) => cache.put(request, clone)).catch(() => {});
+        }
         return response;
       })
       .catch(() => caches.match(request).then((cached) => cached || caches.match('index.html')))
