@@ -323,6 +323,7 @@ class TransportApp {
         const logoutBtn = document.getElementById('auth-logout-btn');
         const userLabel = document.getElementById('auth-user-label');
         const userAvatar = document.querySelector('.user-avatar');
+        const userProfile = document.querySelector('.user-profile');
         if (session && session.user) {
             loginBtn?.classList.add('hidden');
             logoutBtn?.classList.remove('hidden');
@@ -334,11 +335,14 @@ class TransportApp {
                 const initials = local ? local.slice(0, 2) : 'US';
                 userAvatar.textContent = initials;
             }
+            if (userProfile) userProfile.style.display = '';
         } else {
             loginBtn?.classList.remove('hidden');
             logoutBtn?.classList.add('hidden');
-            if (userLabel) userLabel.textContent = 'Invité';
-            if (userAvatar) userAvatar.textContent = 'AD';
+            // Hide profile entirely when logged out
+            if (userProfile) userProfile.style.display = 'none';
+            if (userLabel) userLabel.textContent = '';
+            if (userAvatar) userAvatar.textContent = '';
         }
         setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 0);
     }
