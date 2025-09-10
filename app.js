@@ -259,6 +259,13 @@ class TransportApp {
                     if (event === 'PASSWORD_RECOVERY') {
                         this.openResetModal();
                     }
+                    if (event === 'SIGNED_IN') {
+                        // Close any auth modals and go to dashboard
+                        document.getElementById('auth-modal')?.classList.add('hidden');
+                        document.getElementById('reset-modal')?.classList.add('hidden');
+                        this.showPage('dashboard');
+                        this.showToast('Connecté', 'success');
+                    }
                     await this.updateAuthUI();
                     await this.initSupabase();
                 });
